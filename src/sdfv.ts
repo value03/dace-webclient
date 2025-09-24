@@ -38,6 +38,7 @@ import {
     traverseSDFGScopes,
 } from './utils/sdfg/traversal';
 import { showErrorModal } from './utils/utils';
+import { AllocationOverlay } from './overlays/allocation_overlay';
 
 declare const vscode: any;
 
@@ -158,6 +159,21 @@ export abstract class SDFV extends EventEmitter implements ISDFV {
         }, renderer.sdfg);
 
         renderer.drawAsync();
+    }
+
+    public onLoadedAllocationReport(
+        report: Record<string, string[]>,
+        renderer?: SDFGRenderer,
+    ): void {
+        renderer = this.renderer;
+        if (!renderer?.overlayManager.isOverlayActive(AllocationOverlay))
+            renderer?.overlayManager.registerOverlay(AllocationOverlay);
+
+        const ol = renderer?.overlayManager.getOverlay(AllocationOverlay);
+        if (ol && ol instanceof AllocationOverlay) {
+            ol.setAllocationMap(report);
+            ol.refresh();
+        }
     }
 
     public abstract outline(): void;
@@ -362,6 +378,35 @@ export class WebSDFV extends SDFV {
             );
         };
         fileReader.readAsText(target!.files![0]);
+    }
+
+    private loadAllocationReport(e: JQuery.TriggeredEvent): void {
+        console.log('hurray');
+        const target = e.target as { files?: File[] } | undefined;
+        if ((target?.files?.length ?? 0) < 1 || !target!.files![0])
+            return;
+
+        const fileReader = new FileReader();
+        fileReader.onload = (e: ProgressEvent<FileReader>) => {
+            let resultString = '';
+            const res = e.target?.result;
+            if (res) {
+                if(res instanceof ArrayBuffer) {
+                    const decoder = new TextDecoder('utf-8');
+                    resultString = decoder.decode(new Uint8Array(res));
+                } else {
+                    resultString = res;
+                }
+            }
+            this.onLoadedAllocationReport(
+                JSON.parse(resultString) as Record<string, string[]>
+            )
+        };
+        fileReader.readAsText(target!.files![0])
+    }
+
+    private test(e: JQuery.TriggeredEvent): void {
+        console.log('hurray');
     }
 
     public registerEventListeners(): void {
@@ -595,9 +640,9 @@ export class WebSDFV extends SDFV {
             $('#load-instrumentation-report-btn').prop('disabled', false);
             $('#load-memory-footprint-file-btn').prop('disabled', false);
             $('#diff-view-btn').prop('disabled', false);
+            $('#load-allocation-report-btn').prop('disabled', false);
         }
     }
-
 }
 
 /**

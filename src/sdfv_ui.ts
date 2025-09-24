@@ -13,6 +13,7 @@ import { WebSDFV } from './sdfv';
 import { sdfgPropertyToString } from './utils/sdfg/display';
 import type { DagreGraph, SDFGRenderer } from './renderer/sdfg/sdfg_renderer';
 import { JsonSDFG, JsonSDFGDataDesc } from './types';
+import { AllocationOverlay } from './overlays/allocation_overlay';
 
 
 export interface ISDFVUserInterface {
@@ -285,6 +286,23 @@ export class SDFVWebUI implements ISDFVUserInterface {
                         html: sdfgPropertyToString(attr[1]),
                     }));
                     contents.append($('<br>'));
+                }
+                if(renderer.overlayManager.isOverlayActive(AllocationOverlay)) {
+                    const ol =
+                        renderer.overlayManager.getOverlay(AllocationOverlay);
+
+                    if(
+                        ol &&
+                        ol instanceof AllocationOverlay &&
+                        ol.hasKey(elem.attributes()?.guid)
+                    ) {
+                        contents.append($('<button>', {
+                            text: 'show allocation overlay',
+                            click: function () {
+                                ol.setFocusedNode(elem.attributes()?.guid);
+                            }
+                        }));
+                    }
                 }
             }
         }
