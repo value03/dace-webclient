@@ -422,6 +422,11 @@ export class WebSDFV extends SDFV {
             this.loadMemoryFootprintFile.bind(this)
         );
         $(document).on(
+            'change.sdfv',
+            '#allocation-report-file-input',
+            this.loadAllocationReport.bind(this),
+        );
+        $(document).on(
             'change.sdfv', '#second-sdfg-file-input',
             this.loadDiffSDFG.bind(this)
         );
