@@ -7,6 +7,7 @@ import {
 import { SDFGRenderer } from '../renderer/sdfg/sdfg_renderer';
 import { OverlayType } from '../types';
 import { GenericSdfgOverlay } from './common/generic_sdfg_overlay';
+import { KELLY_COLORS } from 'rendure/src/utils/colors';
 
 export class AllocationOverlay extends GenericSdfgOverlay {
 
@@ -14,7 +15,7 @@ export class AllocationOverlay extends GenericSdfgOverlay {
     public readonly olClass: typeof GenericSdfgOverlay = AllocationOverlay;
 
     private AllocationMap: Record<string, string[]> = {};
-    private FocusedNode: string | null = null;
+    private FocusedNodes: string[] = [];
 
     public constructor(renderer: SDFGRenderer) {
         super(renderer);
@@ -31,8 +32,8 @@ export class AllocationOverlay extends GenericSdfgOverlay {
     }
 
     public setFocusedNode(node: any) {
-        if (typeof node === 'string')
-            this.FocusedNode = node;
+        if (typeof node === 'string' && !this.FocusedNodes.includes(node))
+            this.FocusedNodes.push(node);
     }
 
     public hasKey(node: any) {
@@ -43,12 +44,11 @@ export class AllocationOverlay extends GenericSdfgOverlay {
 
 
     public shadeElem(elem: SDFGElement): void {
-        if (
-            this.FocusedNode !== null &&
-            Object.keys(this.AllocationMap).includes(this.FocusedNode)
-        ) {
-            if (this.AllocationMap[this.FocusedNode].includes(elem.guid))
-                elem.shade('#ff0000', 0.5);
+        for(const [index, dataContainer] of this.FocusedNodes.entries()) {
+            if(Object.keys(this.AllocationMap).includes(dataContainer)) {
+                if (this.AllocationMap[dataContainer].includes(elem.guid))
+                    elem.shade('#' + KELLY_COLORS[index].toString(16));
+            }
         }
     }
 
