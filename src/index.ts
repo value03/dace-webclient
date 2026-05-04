@@ -10,6 +10,7 @@ export * from './overlays/static_flops_overlay';
 export * from './overlays/depth_overlay';
 export * from './overlays/avg_parallelism_overlay';
 export * from './overlays/logical_group_overlay';
+export * from './overlays/allocation_overlay';
 export * from './renderer/sdfg/sdfg_elements';
 export * from './renderer/sdfg/sdfg_renderer';
 export * from './utils/sdfg/display';
